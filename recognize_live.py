@@ -1,8 +1,10 @@
 import cv2
+from networkx import display
 import torch
 import torch.nn.functional as F
 import argparse
 import time
+import constants
 
 from model import size, FaceCNN, get_device
 
@@ -15,7 +17,7 @@ def load_model(checkpoint_path, device):
     return model, ckpt["classes"]
 
 class FaceRecognizer:
-    def __init__(self, model_path="face_model.pt", camera_index=1, threshold=0.9):
+    def __init__(self, model_path="face_model.pt", camera_index=constants.camera_index, threshold=constants.threshold):
         self.device = torch.device("cpu")
         self.model, self.classes = load_model(model_path, self.device)
         self.cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
@@ -86,12 +88,12 @@ class FaceRecognizer:
         color = (0, 200, 0) if name else (200, 0, 0)
         cv2.rectangle(display, (x, y), (x + w, y+ h), color, 2)
         cv2.putText(display, label, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 2)
-
         for i, cls_name in enumerate(self.classes):
             probText = f"{cls_name}: {probs[i].item():.2f}"
             cv2.putText(display, probText, (10, 30 + i * 25), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1)
-
-        return display
+        disp = display.copy()
+        cv2.waitKey(1)
+        return disp
         
     
     def close(self):

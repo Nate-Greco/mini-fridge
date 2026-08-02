@@ -14,13 +14,18 @@ frame = None
 
 def update_frame():
     global frame
+    frame = recognizer.recognizeWithFrame()
+    time.sleep(5)
     while True:
-        frame = recognizer.recognizeWithFrame()
-        if frame is not None:
-            ret, jpeg = cv2.imencode('.jpg', frame)
-            frame = jpeg.tobytes()
-            yield b'--frame\r\nContent-Type: image/jpeg\r\n\r\n' + frame + b'\r\n'
-        time.sleep(0.02)
+        try:
+            frame = recognizer.recognizeWithFrame()
+            if frame is not None:
+                ret, jpeg = cv2.imencode('.jpg', frame)
+                frame = jpeg.tobytes()
+                yield b'--frame\r\nContent-Type: image/jpeg\r\n\r\n' + frame + b'\r\n'
+            time.sleep(0.02)
+        except Exception as e:
+            print(f"Error in update_frame: {e}")
 
 @app.route('/')
 
